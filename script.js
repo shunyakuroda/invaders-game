@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const restartButton = document.getElementById('restartButton');
 
 // Player
 const player = {
@@ -32,9 +33,13 @@ const enemy = {
 
 let rightPressed = false;
 let leftPressed = false;
+let requestId;
 
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
+restartButton.addEventListener('click', () => {
+    document.location.reload();
+});
 
 function keyDownHandler(e) {
     if (e.key === 'Right' || e.key === 'ArrowRight') {
@@ -154,8 +159,8 @@ function update() {
     });
 
     if (enemies.length === 0) {
-        alert('クリア！');
-        document.location.reload();
+        drawGameClearScreen();
+        cancelAnimationFrame(requestId);
     }
 }
 
@@ -166,10 +171,20 @@ function draw() {
     drawEnemies();
 }
 
+function drawGameClearScreen() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = '48px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ゲームクリア！', canvas.width / 2, canvas.height / 2);
+    restartButton.style.display = 'block';
+}
+
 function gameLoop() {
     update();
     draw();
-    requestAnimationFrame(gameLoop);
+    requestId = requestAnimationFrame(gameLoop);
 }
 
 createEnemies();
