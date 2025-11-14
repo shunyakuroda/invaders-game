@@ -1,8 +1,27 @@
+/**
+ * @const {HTMLCanvasElement} canvas - ゲーム用のキャンバス要素。
+ */
 const canvas = document.getElementById('gameCanvas');
+/**
+ * @const {CanvasRenderingContext2D} ctx - キャンバスの2Dレンダリングコンテキスト。
+ */
 const ctx = canvas.getContext('2d');
 const restartButton = document.getElementById('restartButton');
 
-// Player
+/**
+ * @typedef {object} Player
+ * @property {number} x - プレイヤーのx座標。
+ * @property {number} y - プレイヤーのy座標。
+ * @property {number} width - プレイヤーの幅。
+ * @property {number} height - プレイヤーの高さ。
+ * @property {string} color - プレイヤーの色。
+ * @property {number} dx - プレイヤーの水平移動速度。
+ */
+
+/**
+ * プレイヤーオブジェクト。
+ * @type {Player}
+ */
 const player = {
     x: canvas.width / 2 - 15,
     y: canvas.height - 30,
@@ -12,8 +31,29 @@ const player = {
     dx: 5
 };
 
-// Bullets
+/**
+ * @typedef {object} Bullet
+ * @property {number} x - 弾のx座標。
+ * @property {number} y - 弾のy座標。
+ * @property {number} width - 弾の幅。
+ * @property {number} height - 弾の高さ。
+ * @property {string} color - 弾の色。
+ * @property {number} dy - 弾の垂直移動速度。
+ */
+
+/**
+ * すべての弾オブジェクトを格納する配列。
+ * @type {Bullet[]}
+ */
 let bullets = [];
+/**
+ * 新しい弾を作成するためのテンプレートオブジェクト。
+ * @type {object}
+ * @property {number} width - 弾の幅。
+ * @property {number} height - 弾の高さ。
+ * @property {string} color - 弾の色。
+ * @property {number} dy - 弾の垂直速度。
+ */
 const bullet = {
     width: 3,
     height: 10,
@@ -21,8 +61,30 @@ const bullet = {
     dy: -7
 };
 
-// Enemies
+/**
+ * @typedef {object} Enemy
+ * @property {number} x - 敵のx座標。
+ * @property {number} y - 敵のy座標。
+ * @property {number} width - 敵の幅。
+ * @property {number} height - 敵の高さ。
+ * @property {string} color - 敵の色。
+ * @property {number} dx - 敵の水平移動速度。
+ */
+
+/**
+ * すべての敵オブジェクトを格納する配列。
+ * @type {Enemy[]}
+ */
 let enemies = [];
+/**
+ * 新しい敵を作成するためのテンプレートオブジェクト。
+ * @type {object}
+ * @property {number} width - 敵の幅。
+ * @property {number} height - 敵の高さ。
+ * @property {string} color - 敵の色。
+ * @property {number} dx - 敵の水平速度。
+ * @property {number} dy - 敵が端に当たったときに下に移動する垂直距離。
+ */
 const enemy = {
     width: 20,
     height: 20,
@@ -31,7 +93,15 @@ const enemy = {
     dy: 20
 };
 
+/**
+ * 右矢印キーが押されているかどうかを示すフラグ。
+ * @type {boolean}
+ */
 let rightPressed = false;
+/**
+ * 左矢印キーが押されているかどうかを示すフラグ。
+ * @type {boolean}
+ */
 let leftPressed = false;
 let requestId;
 
@@ -41,6 +111,10 @@ restartButton.addEventListener('click', () => {
     document.location.reload();
 });
 
+/**
+ * keydownイベントを処理します。
+ * @param {KeyboardEvent} e - キーボードイベントオブジェクト。
+ */
 function keyDownHandler(e) {
     if (e.key === 'Right' || e.key === 'ArrowRight') {
         rightPressed = true;
@@ -51,6 +125,10 @@ function keyDownHandler(e) {
     }
 }
 
+/**
+ * keyupイベントを処理します。
+ * @param {KeyboardEvent} e - キーボードイベントオブジェクト。
+ */
 function keyUpHandler(e) {
     if (e.key === 'Right' || e.key === 'ArrowRight') {
         rightPressed = false;
@@ -59,6 +137,9 @@ function keyUpHandler(e) {
     }
 }
 
+/**
+ * 敵のグリッドを作成します。
+ */
 function createEnemies() {
     enemies = [];
     for (let c = 0; c < 5; c++) {
@@ -75,6 +156,9 @@ function createEnemies() {
     }
 }
 
+/**
+ * 新しい弾を作成し、bullets配列に追加します。
+ */
 function shoot() {
     bullets.push({
         x: player.x + player.width / 2 - bullet.width / 2,
@@ -86,11 +170,17 @@ function shoot() {
     });
 }
 
+/**
+ * キャンバスにプレイヤーを描画します。
+ */
 function drawPlayer() {
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
 }
 
+/**
+ * キャンバスにすべての弾を描画します。
+ */
 function drawBullets() {
     bullets.forEach(b => {
         ctx.fillStyle = b.color;
@@ -98,6 +188,9 @@ function drawBullets() {
     });
 }
 
+/**
+ * キャンバスにすべての敵を描画します。
+ */
 function drawEnemies() {
     enemies.forEach(e => {
         ctx.fillStyle = e.color;
@@ -105,15 +198,18 @@ function drawEnemies() {
     });
 }
 
+/**
+ * フレームごとにゲームの状態を更新します。
+ */
 function update() {
-    // Move player
+    // プレイヤーを動かす
     if (rightPressed && player.x < canvas.width - player.width) {
         player.x += player.dx;
     } else if (leftPressed && player.x > 0) {
         player.x -= player.dx;
     }
 
-    // Move bullets
+    // 弾を動かす
     bullets.forEach((b, i) => {
         b.y += b.dy;
         if (b.y < 0) {
@@ -121,7 +217,7 @@ function update() {
         }
     });
 
-    // Move enemies
+    // 敵を動かす
     let edge = false;
     enemies.forEach(e => {
         e.x += e.dx;
@@ -137,7 +233,7 @@ function update() {
         });
     }
 
-    // Collision detection
+    // 衝突検出
     bullets.forEach((b, bi) => {
         enemies.forEach((e, ei) => {
             if (b.x < e.x + e.width &&
@@ -150,7 +246,7 @@ function update() {
         });
     });
 
-    // Game over
+    // ゲームオーバー
     enemies.forEach(e => {
         if (e.y + e.height > player.y) {
             alert('ゲームオーバー');
@@ -164,6 +260,9 @@ function update() {
     }
 }
 
+/**
+ * キャンバスをクリアし、すべてのゲームオブジェクトを描画します。
+ */
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawPlayer();
