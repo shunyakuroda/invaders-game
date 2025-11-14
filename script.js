@@ -6,6 +6,7 @@ const canvas = document.getElementById('gameCanvas');
  * @const {CanvasRenderingContext2D} ctx - キャンバスの2Dレンダリングコンテキスト。
  */
 const ctx = canvas.getContext('2d');
+const restartButton = document.getElementById('restartButton');
 
 /**
  * @typedef {object} Player
@@ -102,9 +103,13 @@ let rightPressed = false;
  * @type {boolean}
  */
 let leftPressed = false;
+let requestId;
 
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
+restartButton.addEventListener('click', () => {
+    document.location.reload();
+});
 
 /**
  * keydownイベントを処理します。
@@ -250,8 +255,8 @@ function update() {
     });
 
     if (enemies.length === 0) {
-        alert('クリア！');
-        document.location.reload();
+        drawGameClearScreen();
+        cancelAnimationFrame(requestId);
     }
 }
 
@@ -265,13 +270,20 @@ function draw() {
     drawEnemies();
 }
 
-/**
- * メインゲームループ。
- */
+function drawGameClearScreen() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = '48px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('ゲームクリア！', canvas.width / 2, canvas.height / 2);
+    restartButton.style.display = 'block';
+}
+
 function gameLoop() {
     update();
     draw();
-    requestAnimationFrame(gameLoop);
+    requestId = requestAnimationFrame(gameLoop);
 }
 
 createEnemies();
